@@ -80,6 +80,10 @@
     .\Show-AntiSpoof -Domain contoso.com
     Overrides checking Accepted Domains from the Exchange environment and checks only the provides domain
     No Exchange PowerShell required when this is used.
+
+    .\Show-AntiSpoof -Domain contoso.com -Selector Selector1
+    Will check whether the specified domain has the DKIM selector specified by the -Selector parameter.
+    
 #>
 
 # Add support for default parameters

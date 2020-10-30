@@ -10,7 +10,7 @@ https://dirteam.com/dave
 MIT License
 Copyright (c) 2018-2020 Dave Stork
 
-# VERSION
+# Version
 Version 1.00    17 August 2018
 Version 1.01    20 August 2018
 Version 1.02    21 August 2018
@@ -37,7 +37,7 @@ Version 1.1     30 October 2020
 # Link
 https://dirteam.com/dave
 
-# DESCRIPTION
+# Description
 Run the script in Exchange PowerShell (remote or in your current environment) and a report will be show with the current external SPF 
 and DMARC configuration. Edit the variable if you require another default DNS server. Without Exchange PowerShell, you can run the script and get the same information by explicitly stating a domain.
 
@@ -54,3 +54,7 @@ and DMARC configuration. Edit the variable if you require another default DNS se
     .\Show-AntiSpoof -Domain contoso.com
     Overrides checking Accepted Domains from the Exchange environment and checks only the provides domain
     No Exchange PowerShell required when this is used.
+
+    .\Show-AntiSpoof -Domain contoso.com -Selector Selector1
+    Will check whether the specified domain has the DKIM selector specified by the -Selector parameter.
+    
