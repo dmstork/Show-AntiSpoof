@@ -40,7 +40,7 @@
     Version 1.02    21 August 2018
     Version 1.03    12 December 2019
     Version 1.04    07 Februari 2020
-    Version 1.1     30 October 2020
+    Version 1.10    30 October 2020
 
     Revision History
     ---------------------------------------------------------------------
@@ -83,7 +83,7 @@
 
     .\Show-AntiSpoof -Domain contoso.com -Selector Selector1
     Will check whether the specified domain has the DKIM selector specified by the -Selector parameter.
-    
+
 #>
 
 # Add support for default parameters

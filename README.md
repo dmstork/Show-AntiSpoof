@@ -16,7 +16,7 @@ MIT License Copyright (c) 2018-2020 Dave Stork
 - Version 1.02    21 August 2018
 - Version 1.03    12 December 2019
 - Version 1.04    07 Februari 2020
-- Version 1.1     30 October 2020
+- Version 1.10    30 October 2020
 
 # Revision History
 - 1.00    Private release
@@ -24,7 +24,7 @@ MIT License Copyright (c) 2018-2020 Dave Stork
 - 1.02    Added support for custom domain at commandline, overrules checking Exchange
 - 1.03    Added MX records lookup
 - 1.04    Small bugfixes: Using Get-AcceptedDomains correctly, better DNS server check.
-- 1.1     Added more extensive DKIM checks for known selectors AND added parameter to check for a custom selector
+- 1.10    Added more extensive DKIM checks for known selectors AND added parameter to check for a custom selector
 
 # Known Limitations
 - Required to be run in Exchange PowerShell in order to check all of your accepted domains in one run.
