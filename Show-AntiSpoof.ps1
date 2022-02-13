@@ -311,11 +311,12 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
         $MTASTSDomainFileURL = "https://mta-sts."+$AcceptedDomain+"/.well-known/mta-sts.txt"
 
         Try {
-            $MTASTSDomainFile = Invoke-WebRequest -Uri $MTASTSDomainFileURL 
-            
+            $MTASTSDomainFile = Invoke-WebRequest -UseBasicParsing -Uri $MTASTSDomainFileURL 
+            $MTASTSPolicy = $MTASTSDomainFile.Content
+
             $DefaultColor = $host.ui.RawUI.ForegroundColor
             $host.ui.RawUI.ForegroundColor = "Green"
-            Write-Output "MTA-STS Policy: $MTASTSDomainFile"
+            Write-Output "MTA-STS Policy: $MTASTSPolicy"
             $host.ui.RawUI.ForegroundColor = $DefaultColor
         } Catch {
             $ErrorMessage = $_.Exception.Message
