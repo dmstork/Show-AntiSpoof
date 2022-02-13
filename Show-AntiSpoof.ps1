@@ -41,6 +41,7 @@
     Version 1.03    12 December 2019
     Version 1.04    07 Februari 2020
     Version 1.10    30 October 2020
+    Version 1.20    13 Februari 2022
 
     Revision History
     ---------------------------------------------------------------------
@@ -49,7 +50,8 @@
     1.02    Added support for custom domain at commandline, overrules checking Exchange
     1.03    Added MX records lookup
     1.04    Small bugfixes: Using Get-AcceptedDomains correctly, better DNS server check.
-    1.1     Added more extensive DKIM checks for known selectors AND added parameter to check for a custom selector
+    1.10    Added more extensive DKIM checks for known selectors AND added parameter to check for a custom selector
+    1.20    Added MTA-STS and TLS-RPT checks
 
     KNOWN LIMITATIONS:
     - Required to be run in Exchange PowerShell in order to check all of your accepted domains in one run.
@@ -284,6 +286,71 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
             Write-Output " No custom selector $DKIMDomainSelector present"
         }
     }
+
+    # Check-MTA-STS
+    Try {
+        $MTASTSDomain = "_mta-sts."+$AcceptedDomain
+        $MTASTSRecord = Resolve-DnsName -Server $DNSServer -Type TXT -Name $MTASTSDomain -Dnsonly -ErrorAction Stop
+        $MTASTSString = $MTASTSRecord.Strings
+        
+        $DefaultColor = $host.ui.RawUI.ForegroundColor
+        $host.ui.RawUI.ForegroundColor = "Green"
+        Write-Output "MTA-STS: $MTASTSString"
+        $host.ui.RawUI.ForegroundColor = $DefaultColor
+    } Catch {
+        $ErrorMessage = $_.Exception.Message
+        
+        $DefaultColor = $host.ui.RawUI.ForegroundColor
+        $host.ui.RawUI.ForegroundColor = "Red"
+        Write-Output $ErrorMessage
+        $host.ui.RawUI.ForegroundColor = $DefaultColor
+    }
+
+    # Get mta-sts.txt if it exists
+    If ($null -ne $MTASTSRecord){
+        $MTASTSDomainFileURL = "https://mta-sts."+$AcceptedDomain+"/.well-known/mta-sts.txt"
+
+        Try {
+            $MTASTSDomainFile = Invoke-WebRequest -UseBasicParsing -Uri $MTASTSDomainFileURL 
+            $MTASTSPolicy = $MTASTSDomainFile.Content
+
+            $DefaultColor = $host.ui.RawUI.ForegroundColor
+            $host.ui.RawUI.ForegroundColor = "Green"
+            Write-Output "MTA-STS Policy: "
+            $host.ui.RawUI.ForegroundColor = "Cyan"
+            Write-Output $MTASTSPolicy
+            $host.ui.RawUI.ForegroundColor = $DefaultColor
+        } Catch {
+            $ErrorMessage = $_.Exception.Message
+        
+            $DefaultColor = $host.ui.RawUI.ForegroundColor
+            $host.ui.RawUI.ForegroundColor = "Red"
+            Write-Output $ErrorMessage
+            $host.ui.RawUI.ForegroundColor = $DefaultColor
+        }
+
+    }
+
+    # Check TLS-RPT
+    Try {
+        $TLSRPTDomain = "_smtp._tls."+$AcceptedDomain
+        $TLSRPTRecord = Resolve-DnsName -Server $DNSServer -Type TXT -Name $TLSRPTDomain -Dnsonly -ErrorAction Stop
+        $TLSRPTString = $TLSRPTRecord.Strings
+        
+        $DefaultColor = $host.ui.RawUI.ForegroundColor
+        $host.ui.RawUI.ForegroundColor = "Green"
+        Write-Output "TLS-RPT: $TLSRPTString"
+        $host.ui.RawUI.ForegroundColor = $DefaultColor
+    } Catch {
+        $ErrorMessage = $_.Exception.Message
+        
+        $DefaultColor = $host.ui.RawUI.ForegroundColor
+        $host.ui.RawUI.ForegroundColor = "Red"
+        Write-Output $ErrorMessage
+        $host.ui.RawUI.ForegroundColor = $DefaultColor
+    }
+    
+
 }
 
 
