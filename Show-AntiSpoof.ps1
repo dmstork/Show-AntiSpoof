@@ -316,7 +316,9 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
 
             $DefaultColor = $host.ui.RawUI.ForegroundColor
             $host.ui.RawUI.ForegroundColor = "Green"
-            Write-Output "MTA-STS Policy: $MTASTSPolicy"
+            Write-Output "MTA-STS Policy: "
+            $host.ui.RawUI.ForegroundColor = "Cyan"
+            Write-Output $MTASTSPolicy
             $host.ui.RawUI.ForegroundColor = $DefaultColor
         } Catch {
             $ErrorMessage = $_.Exception.Message
