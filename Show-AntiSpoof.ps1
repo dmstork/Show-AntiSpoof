@@ -42,6 +42,7 @@
     Version 1.04    07 Februari 2020
     Version 1.10    30 October 2020
     Version 1.20    13 Februari 2022
+    Version 1.30    29 April 2022
 
     Revision History
     ---------------------------------------------------------------------
@@ -52,6 +53,7 @@
     1.04    Small bugfixes: Using Get-AcceptedDomains correctly, better DNS server check.
     1.10    Added more extensive DKIM checks for known selectors AND added parameter to check for a custom selector
     1.20    Added MTA-STS and TLS-RPT checks
+    1.30    Added batch file support for domains. Changed default DNS server to 1.1.1.1. Fixed AcceptedDomains issue with Exchange
 
     KNOWN LIMITATIONS:
     - Required to be run in Exchange PowerShell in order to check all of your accepted domains in one run.
@@ -79,12 +81,15 @@
     .\Show-AntiSpoof -DNSServer 1.2.3.4
     Overrides the default DNS server (8.8.8.8) with one specified.
     
-    .\Show-AntiSpoof -Domain contoso.com
+    .\Show-AntiSpoof -DomainName contoso.com
     Overrides checking Accepted Domains from the Exchange environment and checks only the provides domain
     No Exchange PowerShell required when this is used.
 
-    .\Show-AntiSpoof -Domain contoso.com -Selector Selector1
+    .\Show-AntiSpoof -DomainName contoso.com -Selector Selector1
     Will check whether the specified domain has the DKIM selector specified by the -Selector parameter.
+
+    .\Show-AntiSpoof -DomainBatchfile domains.csv
+    Will check all domains in CSV file with header "DomainName"
 
 #>
 
@@ -95,16 +100,17 @@
 Param(
     [switch]$TranscriptOn,
     [String]$DNSServer,
-    [String]$Domain,
-    [String]$Selector
+    [String]$DomainName,
+    [String]$Selector,
+    [String]$DomainBatchFile
 )
 
 #Initialize constants
-$DNSServerDefault = "8.8.8.8"
+$DNSServerDefault = "1.1.1.1"
 
 If ($DNSServer -ne $null){
     Try {
-        Resolve-DnsName -Server $DNSServer -Type MX -Name internet.nl -ErrorAction Stop
+        Resolve-DnsName -Server $DNSServer -Type MX -Name "internet.nl" -ErrorAction Stop
         Write-Output "Using IP $DNSServer as DNS server"
     } Catch {  
         $DefaultColor = $host.ui.RawUI.ForegroundColor
@@ -127,13 +133,27 @@ If ($TranscriptOn -eq $true) {
 }
 
 # Overriding Exchange Accepted Domains
-If ($Domain -eq ""){
-    $AcceptedDomains = Get-AcceptedDomain 
-}  Else {
-    $AcceptedDomains = $Domain
+# If $Domain and $DomainFile are emtpy, use AcceptedDomains
+If (($DomainName -eq "") -and ($DomainBatchFile -eq "")){
+    $DomainOption = 1
+    $AcceptedDomains = Get-AcceptedDomain
+   # if $Domain is not empty and $Domainfile is empty, check single domain
+}  ElseIf (($Null -ne $DomainName) -and ($DomainBatchFile -eq "")) {
+    $DomainOption = 2
+    $AcceptedDomains = $DomainName
+    # If $Domain is empty
+    } Elseif ($null -ne $DomainBatchFile) {
+        $DomainOption = 3
+        $AcceptedDomains = Import-Csv $DomainBatchFile
 }
 
 ForEach ($AcceptedDomain in $AcceptedDomains) {
+    
+    # DomainOption 2 is the only single domain from cmdline, which has no header. So this is a workaround.
+    If ($DomainOption -ne 2){
+        $AcceptedDomain = $AcceptedDomain.DomainName
+    }
+
     Write-Output ""
     Write-Output "==============="
     Write-Output "Checking domain $AcceptedDomain"
