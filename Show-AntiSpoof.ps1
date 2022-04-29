@@ -147,6 +147,44 @@ If (($DomainName -eq "") -and ($DomainBatchFile -eq "")){
         $AcceptedDomains = Import-Csv $DomainBatchFile
 }
 
+Function Get-MX {
+    Param($CheckDomain)
+
+        # Check MX record
+        Try {
+            $MXRecords = Resolve-DnsName -Server $DNSServer -Type MX -Name $CheckDomain -DNSOnly -ErrorAction Stop
+            $MXNumber = ($MXRecords).Count
+            $MXcounter=1
+    
+            $DefaultColor = $host.ui.RawUI.ForegroundColor
+            $host.ui.RawUI.ForegroundColor = "Magenta"
+            Write-Output "Number of MX Records: $MXNumber"
+            $host.ui.RawUI.ForegroundColor = $DefaultColor 
+    
+            ForEach ($MXRecord in $MXRecords) {
+                $MXNameExchange = $MXRecord.NameExchange
+                $MXPreference = $MXRecord.Preference
+                $MXTTL = $MXRecord.TTL
+               
+    
+                If ($null -ne $MXNameExchange) {
+                    $DefaultColor = $host.ui.RawUI.ForegroundColor
+                    $host.ui.RawUI.ForegroundColor = "Magenta"
+                    Write-Output "MX$MXCounter targets $MXNameExchange with preference $MXPreference and TTL $MXTTL"
+                    $host.ui.RawUI.ForegroundColor = $DefaultColor 
+                }
+                $MXcounter++
+            }
+        } Catch {
+            $DefaultColor = $host.ui.RawUI.ForegroundColor
+            $host.ui.RawUI.ForegroundColor = "Red"
+            $ErrorMessage = $_.Exception.Message
+            Write-Output "MX lookup failure: $ErrorMessage"
+            $host.ui.RawUI.ForegroundColor = $DefaultColor     
+        }
+    
+    }
+
 ForEach ($AcceptedDomain in $AcceptedDomains) {
     
     # DomainOption 2 is the only single domain from cmdline, which has no header. So this is a workaround.
@@ -159,38 +197,6 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
     Write-Output "Checking domain $AcceptedDomain"
     Write-Output "==============="
 
-    # Check MX record
-    Try {
-        $MXRecords = Resolve-DnsName -Server $DNSServer -Type MX -Name $AcceptedDomain -DNSOnly -ErrorAction Stop
-        $MXNumber = ($MXRecords).Count
-        $MXcounter=1
-
-        $DefaultColor = $host.ui.RawUI.ForegroundColor
-        $host.ui.RawUI.ForegroundColor = "Magenta"
-        Write-Output "Number of MX Records: $MXNumber"
-        $host.ui.RawUI.ForegroundColor = $DefaultColor 
-
-        ForEach ($MXRecord in $MXRecords) {
-            $MXNameExchange = $MXRecord.NameExchange
-            $MXPreference = $MXRecord.Preference
-            $MXTTL = $MXRecord.TTL
-           
-
-            If ($null -ne $MXNameExchange) {
-                $DefaultColor = $host.ui.RawUI.ForegroundColor
-                $host.ui.RawUI.ForegroundColor = "Magenta"
-                Write-Output "MX$MXCounter targets $MXNameExchange with preference $MXPreference and TTL $MXTTL"
-                $host.ui.RawUI.ForegroundColor = $DefaultColor 
-            }
-            $MXcounter++
-        }
-    } Catch {
-        $DefaultColor = $host.ui.RawUI.ForegroundColor
-        $host.ui.RawUI.ForegroundColor = "Red"
-        $ErrorMessage = $_.Exception.Message
-        Write-Output "MX lookup failure: $ErrorMessage"
-        $host.ui.RawUI.ForegroundColor = $DefaultColor     
-    }
 
     # Check SPF record
     Try {
