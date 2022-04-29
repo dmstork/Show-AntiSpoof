@@ -17,6 +17,9 @@ MIT License Copyright (c) 2018-2020 Dave Stork
 - Version 1.03    12 December 2019
 - Version 1.04    07 Februari 2020
 - Version 1.10    30 October 2020
+- Version 1.10    30 October 2020
+- Version 1.20    13 Februari 2022
+- Version 1.30    29 April 2022
 
 # Revision History
 - 1.00    Private release
@@ -25,6 +28,8 @@ MIT License Copyright (c) 2018-2020 Dave Stork
 - 1.03    Added MX records lookup
 - 1.04    Small bugfixes: Using Get-AcceptedDomains correctly, better DNS server check.
 - 1.10    Added more extensive DKIM checks for known selectors AND added parameter to check for a custom selector
+- 1.20    Added MTA-STS and TLS-RPT checks
+- 1.30    Added batch file support for domains. Changed default DNS server to 1.1.1.1. Fixed AcceptedDomains issue with Exchange
 
 # Known Limitations
 - Required to be run in Exchange PowerShell in order to check all of your accepted domains in one run.
@@ -51,10 +56,13 @@ and DMARC configuration. Edit the variable if you require another default DNS se
     .\Show-AntiSpoof -DNSServer 1.2.3.4
     Overrides the default DNS server (8.8.8.8) with one specified.
     
-    .\Show-AntiSpoof -Domain contoso.com
+    .\Show-AntiSpoof -DomainName contoso.com
     Overrides checking Accepted Domains from the Exchange environment and checks only the provides domain
     No Exchange PowerShell required when this is used.
 
-    .\Show-AntiSpoof -Domain contoso.com -Selector Selector1
+    .\Show-AntiSpoof -DomainName contoso.com -Selector Selector1
     Will check whether the specified domain has the DKIM selector specified by the -Selector parameter.
+
+    .\Show-AntiSpoof -DomainBatchfile domains.csv
+    Will check all domains in CSV file with header "DomainName"
     
