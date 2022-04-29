@@ -110,7 +110,7 @@ $DNSServerDefault = "1.1.1.1"
 
 If ($DNSServer -ne $null){
     Try {
-        Resolve-DnsName -Server $DNSServer -Type MX -Name "internet.nl" -ErrorAction Stop
+        $Test = Resolve-DnsName -Server $DNSServer -Type MX -Name "internet.nl" -ErrorAction Stop
         Write-Output "Using IP $DNSServer as DNS server"
     } Catch {  
         $DefaultColor = $host.ui.RawUI.ForegroundColor
@@ -158,19 +158,18 @@ Function Get-MX {
     
             $DefaultColor = $host.ui.RawUI.ForegroundColor
             $host.ui.RawUI.ForegroundColor = "Magenta"
-            Write-Output "Number of MX Records: $MXNumber"
+            Return Write-Output "Number of MX Records: $MXNumber"
             $host.ui.RawUI.ForegroundColor = $DefaultColor 
     
             ForEach ($MXRecord in $MXRecords) {
                 $MXNameExchange = $MXRecord.NameExchange
                 $MXPreference = $MXRecord.Preference
                 $MXTTL = $MXRecord.TTL
-               
-    
+
                 If ($null -ne $MXNameExchange) {
                     $DefaultColor = $host.ui.RawUI.ForegroundColor
                     $host.ui.RawUI.ForegroundColor = "Magenta"
-                    Write-Output "MX$MXCounter targets $MXNameExchange with preference $MXPreference and TTL $MXTTL"
+                    Return Write-Output "MX$MXCounter targets $MXNameExchange with preference $MXPreference and TTL $MXTTL"
                     $host.ui.RawUI.ForegroundColor = $DefaultColor 
                 }
                 $MXcounter++
@@ -179,11 +178,11 @@ Function Get-MX {
             $DefaultColor = $host.ui.RawUI.ForegroundColor
             $host.ui.RawUI.ForegroundColor = "Red"
             $ErrorMessage = $_.Exception.Message
-            Write-Output "MX lookup failure: $ErrorMessage"
+            Return Write-Output "MX lookup failure: $ErrorMessage"
             $host.ui.RawUI.ForegroundColor = $DefaultColor     
         }
-    
     }
+
 
 ForEach ($AcceptedDomain in $AcceptedDomains) {
     
@@ -196,7 +195,9 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
     Write-Output "==============="
     Write-Output "Checking domain $AcceptedDomain"
     Write-Output "==============="
-
+    
+    # Get the MX record(s) via Function
+    Get-MX -CheckDomain $AcceptedDomain
 
     # Check SPF record
     Try {
@@ -378,7 +379,6 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
     
 
 }
-
 
 
 # End Transcript
