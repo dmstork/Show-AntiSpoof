@@ -403,7 +403,7 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
     Get-DKIM -CheckDomain $AcceptedDomain
     Get-KnownDKIMSelectors -CheckDomain $AcceptedDomain
     Get-MtaSts -CheckDomain $AcceptedDomains
-    Get-MtaSts -CheckDomain $AcceptedDomains
+    Get-TlsRpt -CheckDomain $AcceptedDomains
 }
 
 
