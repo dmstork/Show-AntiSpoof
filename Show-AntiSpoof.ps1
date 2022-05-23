@@ -110,7 +110,7 @@ $DNSServerDefault = "1.1.1.1"
 
 If ($DNSServer -ne $null){
     Try {
-        Resolve-DnsName -Server $DNSServer -Type MX -Name "internet.nl" -ErrorAction Stop
+        $Test = Resolve-DnsName -Server $DNSServer -Type MX -Name "internet.nl" -ErrorAction Stop
         Write-Output "Using IP $DNSServer as DNS server"
     } Catch {  
         $DefaultColor = $host.ui.RawUI.ForegroundColor
@@ -147,34 +147,24 @@ If (($DomainName -eq "") -and ($DomainBatchFile -eq "")){
         $AcceptedDomains = Import-Csv $DomainBatchFile
 }
 
-ForEach ($AcceptedDomain in $AcceptedDomains) {
-    
-    # DomainOption 2 is the only single domain from cmdline, which has no header. So this is a workaround.
-    If ($DomainOption -ne 2){
-        $AcceptedDomain = $AcceptedDomain.DomainName
-    }
-
-    Write-Output ""
-    Write-Output "==============="
-    Write-Output "Checking domain $AcceptedDomain"
-    Write-Output "==============="
+Function Get-MX {
+    Param($CheckDomain)
 
     # Check MX record
     Try {
-        $MXRecords = Resolve-DnsName -Server $DNSServer -Type MX -Name $AcceptedDomain -DNSOnly -ErrorAction Stop
+        $MXRecords = Resolve-DnsName -Server $DNSServer -Type MX -Name $CheckDomain -DNSOnly -ErrorAction Stop
         $MXNumber = ($MXRecords).Count
         $MXcounter=1
-
+    
         $DefaultColor = $host.ui.RawUI.ForegroundColor
         $host.ui.RawUI.ForegroundColor = "Magenta"
         Write-Output "Number of MX Records: $MXNumber"
         $host.ui.RawUI.ForegroundColor = $DefaultColor 
-
+    
         ForEach ($MXRecord in $MXRecords) {
             $MXNameExchange = $MXRecord.NameExchange
             $MXPreference = $MXRecord.Preference
             $MXTTL = $MXRecord.TTL
-           
 
             If ($null -ne $MXNameExchange) {
                 $DefaultColor = $host.ui.RawUI.ForegroundColor
@@ -191,6 +181,10 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
         Write-Output "MX lookup failure: $ErrorMessage"
         $host.ui.RawUI.ForegroundColor = $DefaultColor     
     }
+}
+
+Function Get-SPF {
+    Param($CheckDomain)
 
     # Check SPF record
     Try {
@@ -217,7 +211,11 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
         Write-Output "SPF lookup failure: $ErrorMessage"
         $host.ui.RawUI.ForegroundColor = $DefaultColor
     }
-    
+}
+
+Function Get-DMARC {
+    Param($CheckDomain)
+
     # Check DMARC record
     Try {
         $DMARCDomain = "_dmarc."+$AcceptedDomain
@@ -236,6 +234,10 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
         Write-Output $ErrorMessage
         $host.ui.RawUI.ForegroundColor = $DefaultColor
     }
+}
+
+Function Get-DKIM {
+    Param($CheckDomain)
 
     # Check DKIM record
     Try {
@@ -257,6 +259,11 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
         Write-Output $DKIMResult
         $host.ui.RawUI.ForegroundColor = $DefaultColor
     }
+
+}
+
+Function Get-KnownDKIMSelectors {
+    Param($CheckDomain)
 
     # Check-KnownDKIMSelectors
     Try {
@@ -306,9 +313,13 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
             Write-Output " No custom selector $DKIMDomainSelector present"
         }
     }
+}
 
-    # Check-MTA-STS
-    Try {
+Function Get-MtaSts {
+    Param($CheckDomain)
+
+       # Check-MTA-STS
+       Try {
         $MTASTSDomain = "_mta-sts."+$AcceptedDomain
         $MTASTSRecord = Resolve-DnsName -Server $DNSServer -Type TXT -Name $MTASTSDomain -Dnsonly -ErrorAction Stop
         $MTASTSString = $MTASTSRecord.Strings
@@ -350,6 +361,10 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
         }
 
     }
+}
+
+Function Get-TlsRpt {
+    Param($CheckDomain)
 
     # Check TLS-RPT
     Try {
@@ -369,10 +384,27 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
         Write-Output $ErrorMessage
         $host.ui.RawUI.ForegroundColor = $DefaultColor
     }
-    
-
 }
 
+ForEach ($AcceptedDomain in $AcceptedDomains) {
+    
+    # DomainOption 2 is the only single domain from cmdline, which has no header. So this is a workaround.
+    If ($DomainOption -ne 2){
+        $AcceptedDomain = $AcceptedDomain.DomainName
+    }
+
+    Write-Output ""
+    Write-Output "==============="
+    Write-Output "Checking domain $AcceptedDomain"
+    Write-Output "==============="
+    Get-MX -CheckDomain $AcceptedDomain
+    Get-SPF -CheckDomain $AcceptedDomain
+    Get-DMARC -CheckDomain $AcceptedDomain
+    Get-DKIM -CheckDomain $AcceptedDomain
+    Get-KnownDKIMSelectors -CheckDomain $AcceptedDomain
+    Get-MtaSts -CheckDomain $AcceptedDomains
+    Get-TlsRpt -CheckDomain $AcceptedDomains
+}
 
 
 # End Transcript
