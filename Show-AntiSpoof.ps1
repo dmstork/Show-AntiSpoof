@@ -96,7 +96,7 @@
 # Add support for default parameters
 [CmdletBinding()]
 
-# Add parameters for target objects which will get postmaster address
+# Add parameters 
 Param(
     [switch]$TranscriptOn,
     [String]$DNSServer,
@@ -108,18 +108,21 @@ Param(
 #Initialize constants
 $DNSServerDefault = "1.1.1.1"
 
-If ($DNSServer -ne $null){
+If ($DNSServer -ne ""){
     Try {
-        $Test = Resolve-DnsName -Server $DNSServer -Type MX -Name "internet.nl" -ErrorAction Stop
+        $temp = Resolve-DnsName -Server $DNSServer -Type A -Name "www.internet.nl" -ErrorAction Stop
         Write-Output "Using IP $DNSServer as DNS server"
     } Catch {  
         $DefaultColor = $host.ui.RawUI.ForegroundColor
         $host.ui.RawUI.ForegroundColor = "Red"
         $ErrorMessage = $_.Exception.Message
-        Write-Output "Error with DNS server, using default. $ErrorMessage"
+        Write-Output "Error with DNS server, using default."
         $host.ui.RawUI.ForegroundColor = $DefaultColor 
         $DNSServer = $DNSServerDefault
     }
+} else {
+    Write-Output "Using default DNS $DNSServerDefault"
+    $DNSServer = $DNSServerDefault
 }
 
 # Start Transcript if requested
@@ -267,8 +270,8 @@ Function Get-KnownDKIMSelectors {
 
     # Check-KnownDKIMSelectors
     Try {
-        $DKIMDomainSelector = "selector1."+$DKIMDomain
-        $DKIMDomainSelectorResult = Resolve-DnsName -Server $DNSServer -Name $DKIMDomainSelector -DnsOnly -ErrorAction Stop
+        $DKIMDomainSelector = "selector1._domainkey."+$CheckDomain
+        $Temp = Resolve-DnsName -Server $DNSServer -Name $DKIMDomainSelector -DnsOnly -ErrorAction Stop
 
         $DefaultColor = $host.ui.RawUI.ForegroundColor
         $host.ui.RawUI.ForegroundColor = "Yellow"
@@ -278,8 +281,8 @@ Function Get-KnownDKIMSelectors {
         Write-Output " No Office 365 Selector1 present"
     }
     Try {
-        $DKIMDomainSelector = "selector2."+$DKIMDomain
-        $DKIMDomainSelectorResult = Resolve-DnsName -Server $DNSServer -Name $DKIMDomainSelector -DnsOnly -ErrorAction Stop
+        $DKIMDomainSelector = "selector2._domainkey."+$CheckDomain
+        $Temp = Resolve-DnsName -Server $DNSServer -Name $DKIMDomainSelector -DnsOnly -ErrorAction Stop
 
         $DefaultColor = $host.ui.RawUI.ForegroundColor
         $host.ui.RawUI.ForegroundColor = "Yellow"
@@ -290,8 +293,8 @@ Function Get-KnownDKIMSelectors {
     }
 
     Try {
-        $DKIMDomainSelector = "k1."+$DKIMDomain
-        $DKIMDomainSelectorResult = Resolve-DnsName -Server $DNSServer -Name $DKIMDomainSelector -DnsOnly -ErrorAction Stop
+        $DKIMDomainSelector = "k1._domainkey."+$CheckDomain
+        $Temp = Resolve-DnsName -Server $DNSServer -Name $DKIMDomainSelector -DnsOnly -ErrorAction Stop
 
         $DefaultColor = $host.ui.RawUI.ForegroundColor
         $host.ui.RawUI.ForegroundColor = "Yellow"
@@ -302,8 +305,8 @@ Function Get-KnownDKIMSelectors {
     }
     If ($Selector -ne ""){
         Try {
-            $DKIMDomainSelector = $Selector+"."+$DKIMDomain
-            $DKIMDomainSelectorResult = Resolve-DnsName -Server $DNSServer -Name $DKIMDomainSelector -DnsOnly -ErrorAction Stop
+            $DKIMDomainSelector = $Selector+"._domainkey."+$CheckDomain
+            $Temp = Resolve-DnsName -Server $DNSServer -Name $DKIMDomainSelector -DnsOnly -ErrorAction Stop
 
             $DefaultColor = $host.ui.RawUI.ForegroundColor
             $host.ui.RawUI.ForegroundColor = "Yellow"
