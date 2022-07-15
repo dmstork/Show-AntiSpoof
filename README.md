@@ -27,21 +27,21 @@ MIT License Copyright (c) 2018-2020 Dave Stork
 
 ### Revision History  
 
--1.00    Private release
--1.01    Added support for custom DNS server at commandline
--1.02    Added support for custom domain at commandline, overrules checking Exchange
--1.03    Added MX records lookup
--1.04    Small bugfixes: Using Get-AcceptedDomains correctly, better DNS server check.
--1.10    Added more extensive DKIM checks for known selectors AND added parameter to check for a custom selector
--1.20    Added MTA-STS and TLS-RPT checks
--1.30    Added batch file support for domains. Changed default DNS server to 1.1.1.1. Fixed AcceptedDomains issue with Exchange
+- 1.00    Private release
+- 1.01    Added support for custom DNS server at commandline
+- 1.02    Added support for custom domain at commandline, overrules checking Exchange
+- 1.03    Added MX records lookup
+- 1.04    Small bugfixes: Using Get-AcceptedDomains correctly, better DNS server check.
+- 1.10    Added more extensive DKIM checks for known selectors AND added parameter to check for a custom selector
+- 1.20    Added MTA-STS and TLS-RPT checks
+- 1.30    Added batch file support for domains. Changed default DNS server to 1.1.1.1. Fixed AcceptedDomains issue with Exchange
 
 ## Known Limitations  
 
--Required to be run in Exchange PowerShell in order to check all of your accepted domains in one run.
--Can't resolve the exact DKIM selector DNS record as that is a variable in most cases. And due to security, most domain services don't allow complete zone transfers, which you would need to find an unknown record. Since v1.1 you can add a customer record though.
--Requires at last Windows Server 2012, or PowerShell v3.0 due to Resolve-DnsName
--DNS check not working as intended, but should be no issue
+- Required to be run in Exchange PowerShell in order to check all of your accepted domains in one run. Alternatively use batch file support.
+- Can't resolve the exact DKIM selector DNS record as that is a variable in most cases. And due to security, most domain services don't allow complete zone transfers, which you would need to find an unknown record. Since v1.1 you can add a customer record though.
+- Requires at last Windows Server 2012, or PowerShell v3.0 due to Resolve-DnsName
+- DNS check not working as intended, but should be no issue
 
 ## Link  
 
