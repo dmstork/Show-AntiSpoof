@@ -191,7 +191,7 @@ Function Get-SPF {
 
     # Check SPF record
     Try {
-        $TXTRecords = Resolve-DnsName -Server $DNSServer -Type TXT -Name $AcceptedDomain -DNSOnly -ErrorAction Stop
+        $TXTRecords = Resolve-DnsName -Server $DNSServer -Type TXT -Name $CheckDomain -DNSOnly -ErrorAction Stop
         ForEach ($TXTRecord in $TXTRecords) {
             $TXTString = $TXTRecord.Strings
             
@@ -221,7 +221,7 @@ Function Get-DMARC {
 
     # Check DMARC record
     Try {
-        $DMARCDomain = "_dmarc."+$AcceptedDomain
+        $DMARCDomain = "_dmarc."+$CheckDomain
         $DMARCRecord = Resolve-DnsName -Server $DNSServer -Type TXT -Name $DMARCDomain -Dnsonly -ErrorAction Stop
         $DMARCString = $DmarcRecord.Strings
         
@@ -244,7 +244,7 @@ Function Get-DKIM {
 
     # Check DKIM record
     Try {
-        $DKIMDomain = "_domainkey."+$AcceptedDomain
+        $DKIMDomain = "_domainkey."+$CheckDomain
         $DKIMResult = Resolve-DnsName -Server $DNSServer -Name $DKIMDomain -DnsOnly -ErrorAction Stop 
             
         $DefaultColor = $host.ui.RawUI.ForegroundColor
@@ -323,7 +323,7 @@ Function Get-MtaSts {
 
        # Check-MTA-STS
        Try {
-        $MTASTSDomain = "_mta-sts."+$AcceptedDomain
+        $MTASTSDomain = "_mta-sts."+$CheckDomain
         $MTASTSRecord = Resolve-DnsName -Server $DNSServer -Type TXT -Name $MTASTSDomain -Dnsonly -ErrorAction Stop
         $MTASTSString = $MTASTSRecord.Strings
         
@@ -342,7 +342,7 @@ Function Get-MtaSts {
 
     # Get mta-sts.txt if it exists
     If ($null -ne $MTASTSRecord){
-        $MTASTSDomainFileURL = "https://mta-sts."+$AcceptedDomain+"/.well-known/mta-sts.txt"
+        $MTASTSDomainFileURL = "https://mta-sts."+$CheckDomain+"/.well-known/mta-sts.txt"
 
         Try {
             $MTASTSDomainFile = Invoke-WebRequest -UseBasicParsing -Uri $MTASTSDomainFileURL 
@@ -371,7 +371,7 @@ Function Get-TlsRpt {
 
     # Check TLS-RPT
     Try {
-        $TLSRPTDomain = "_smtp._tls."+$AcceptedDomain
+        $TLSRPTDomain = "_smtp._tls."+$CheckDomain
         $TLSRPTRecord = Resolve-DnsName -Server $DNSServer -Type TXT -Name $TLSRPTDomain -Dnsonly -ErrorAction Stop
         $TLSRPTString = $TLSRPTRecord.Strings
         
