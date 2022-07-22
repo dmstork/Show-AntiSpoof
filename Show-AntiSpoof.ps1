@@ -43,6 +43,7 @@
     Version 1.10    30 October 2020
     Version 1.20    13 Februari 2022
     Version 1.30    29 April 2022
+    Version 1.40    22 July 2022 (Current)
 
     Revision History
     ---------------------------------------------------------------------
@@ -54,6 +55,7 @@
     1.10    Added more extensive DKIM checks for known selectors AND added parameter to check for a custom selector
     1.20    Added MTA-STS and TLS-RPT checks
     1.30    Added batch file support for domains. Changed default DNS server to 1.1.1.1. Fixed AcceptedDomains issue with Exchange
+    1.40    Added BIMI support. More effecient use of functions, some small bugfixes
 
     KNOWN LIMITATIONS:
     - Required to be run in Exchange PowerShell in order to check all of your accepted domains in one run.
@@ -61,7 +63,6 @@
       And due to security, most domain services don't allow complete zone transfers, 
       which you would need to find an unknown record. Since v1.1 you can add a customer record though.
     - Requires at last Windows Server 2012, or PowerShell v3.0 due to Resolve-DnsName
-    - DNS check not working as intended, but should be no issue
 
     .LINK
     https://dirteam.com/dave
@@ -178,11 +179,8 @@ Function Get-MX {
             $MXcounter++
         }
     } Catch {
-        $DefaultColor = $host.ui.RawUI.ForegroundColor
-        $host.ui.RawUI.ForegroundColor = "Red"
-        $ErrorMessage = $_.Exception.Message
-        Write-Output "MX lookup failure: $ErrorMessage"
-        $host.ui.RawUI.ForegroundColor = $DefaultColor     
+        $ErrorMessage = "MX: $_.Exception.Message"
+        Show-ErrorMessage($ErrorMessage)
     }
 }
 
@@ -191,7 +189,7 @@ Function Get-SPF {
 
     # Check SPF record
     Try {
-        $TXTRecords = Resolve-DnsName -Server $DNSServer -Type TXT -Name $AcceptedDomain -DNSOnly -ErrorAction Stop
+        $TXTRecords = Resolve-DnsName -Server $DNSServer -Type TXT -Name $CheckDomain -DNSOnly -ErrorAction Stop
         ForEach ($TXTRecord in $TXTRecords) {
             $TXTString = $TXTRecord.Strings
             
@@ -208,11 +206,8 @@ Function Get-SPF {
             }
         }
     } Catch {
-        $DefaultColor = $host.ui.RawUI.ForegroundColor
-        $host.ui.RawUI.ForegroundColor = "Red"
-        $ErrorMessage = $_.Exception.Message
-        Write-Output "SPF lookup failure: $ErrorMessage"
-        $host.ui.RawUI.ForegroundColor = $DefaultColor
+        $ErrorMessage = "SPF: $_.Exception.Message"
+        Show-ErrorMessage($ErrorMessage)
     }
 }
 
@@ -221,7 +216,7 @@ Function Get-DMARC {
 
     # Check DMARC record
     Try {
-        $DMARCDomain = "_dmarc."+$AcceptedDomain
+        $DMARCDomain = "_dmarc."+$CheckDomain
         $DMARCRecord = Resolve-DnsName -Server $DNSServer -Type TXT -Name $DMARCDomain -Dnsonly -ErrorAction Stop
         $DMARCString = $DmarcRecord.Strings
         
@@ -230,12 +225,8 @@ Function Get-DMARC {
         Write-Output "DMARC: $DMARCString"
         $host.ui.RawUI.ForegroundColor = $DefaultColor
     } Catch {
-        $ErrorMessage = $_.Exception.Message
-        
-        $DefaultColor = $host.ui.RawUI.ForegroundColor
-        $host.ui.RawUI.ForegroundColor = "Red"
-        Write-Output $ErrorMessage
-        $host.ui.RawUI.ForegroundColor = $DefaultColor
+        $ErrorMessage = "DMARC: $_.Exception.Message"
+        Show-ErrorMessage($ErrorMessage)
     }
 }
 
@@ -244,7 +235,7 @@ Function Get-DKIM {
 
     # Check DKIM record
     Try {
-        $DKIMDomain = "_domainkey."+$AcceptedDomain
+        $DKIMDomain = "_domainkey."+$CheckDomain
         $DKIMResult = Resolve-DnsName -Server $DNSServer -Name $DKIMDomain -DnsOnly -ErrorAction Stop 
             
         $DefaultColor = $host.ui.RawUI.ForegroundColor
@@ -253,14 +244,8 @@ Function Get-DKIM {
         $host.ui.RawUI.ForegroundColor = $DefaultColor
 
     } Catch {
-        $ErrorMessage = $_.Exception.Message
-        
-        $DefaultColor = $host.ui.RawUI.ForegroundColor
-        $host.ui.RawUI.ForegroundColor = "Red"
-        Write-Output $ErrorMessage
-        $DKIMResult = $null
-        Write-Output $DKIMResult
-        $host.ui.RawUI.ForegroundColor = $DefaultColor
+        $ErrorMessage = "DKIM Record: $_.Exception.Message"
+        Show-ErrorMessage($ErrorMessage)
     }
 
 }
@@ -323,7 +308,7 @@ Function Get-MtaSts {
 
        # Check-MTA-STS
        Try {
-        $MTASTSDomain = "_mta-sts."+$AcceptedDomain
+        $MTASTSDomain = "_mta-sts."+$CheckDomain
         $MTASTSRecord = Resolve-DnsName -Server $DNSServer -Type TXT -Name $MTASTSDomain -Dnsonly -ErrorAction Stop
         $MTASTSString = $MTASTSRecord.Strings
         
@@ -332,20 +317,16 @@ Function Get-MtaSts {
         Write-Output "MTA-STS: $MTASTSString"
         $host.ui.RawUI.ForegroundColor = $DefaultColor
     } Catch {
-        $ErrorMessage = $_.Exception.Message
-        
-        $DefaultColor = $host.ui.RawUI.ForegroundColor
-        $host.ui.RawUI.ForegroundColor = "Red"
-        Write-Output $ErrorMessage
-        $host.ui.RawUI.ForegroundColor = $DefaultColor
+        $ErrorMessage = "MTA-STS Record: $_.Exception.Message"
+        Show-ErrorMessage($ErrorMessage)
     }
 
     # Get mta-sts.txt if it exists
     If ($null -ne $MTASTSRecord){
-        $MTASTSDomainFileURL = "https://mta-sts."+$AcceptedDomain+"/.well-known/mta-sts.txt"
+        $MTASTSDomainFileURL = "https://mta-sts."+$CheckDomain+"/.well-known/mta-sts.txt"
 
         Try {
-            $MTASTSDomainFile = Invoke-WebRequest -UseBasicParsing -Uri $MTASTSDomainFileURL 
+            $MTASTSDomainFile = Invoke-WebRequest -UseBasicParsing -Uri $MTASTSDomainFileURL
             $MTASTSPolicy = $MTASTSDomainFile.Content
 
             $DefaultColor = $host.ui.RawUI.ForegroundColor
@@ -355,23 +336,29 @@ Function Get-MtaSts {
             Write-Output $MTASTSPolicy
             $host.ui.RawUI.ForegroundColor = $DefaultColor
         } Catch {
-            $ErrorMessage = $_.Exception.Message
-        
-            $DefaultColor = $host.ui.RawUI.ForegroundColor
-            $host.ui.RawUI.ForegroundColor = "Red"
-            Write-Output $ErrorMessage
-            $host.ui.RawUI.ForegroundColor = $DefaultColor
+            $ErrorMessage = "MTA-STS Policy: $_.Exception.Message"
+            Show-ErrorMessage($ErrorMessage)
         }
 
     }
 }
 
+
+function Show-ErrorMessage {
+        Param($ErrorMessage)
+
+        $DefaultColor = $host.ui.RawUI.ForegroundColor
+        $host.ui.RawUI.ForegroundColor = "Red"
+        Write-Output $ErrorMessage
+        $host.ui.RawUI.ForegroundColor = $DefaultColor
+    
+}
 Function Get-TlsRpt {
     Param($CheckDomain)
 
     # Check TLS-RPT
     Try {
-        $TLSRPTDomain = "_smtp._tls."+$AcceptedDomain
+        $TLSRPTDomain = "_smtp._tls."+$CheckDomain
         $TLSRPTRecord = Resolve-DnsName -Server $DNSServer -Type TXT -Name $TLSRPTDomain -Dnsonly -ErrorAction Stop
         $TLSRPTString = $TLSRPTRecord.Strings
         
@@ -380,12 +367,25 @@ Function Get-TlsRpt {
         Write-Output "TLS-RPT: $TLSRPTString"
         $host.ui.RawUI.ForegroundColor = $DefaultColor
     } Catch {
-        $ErrorMessage = $_.Exception.Message
-        
+        $ErrorMessage = "TLS-RPT: $_.Exception.Message"
+        Show-ErrorMessage($ErrorMessage)
+    }
+}
+
+Function Get-BIMI {
+    Param($CheckDomain)
+
+    Try {
+        $BIMIDomain = "default._bimi."+$CheckDomain
+        $BIMIRecord = Resolve-DnsName -Server $DNSServer -Type TXT -Name $BIMIDomain -DnsOnly -ErrorAction Stop
+        $BIMIString = $BIMIRecord.Strings
         $DefaultColor = $host.ui.RawUI.ForegroundColor
-        $host.ui.RawUI.ForegroundColor = "Red"
-        Write-Output $ErrorMessage
+        $host.ui.RawUI.ForegroundColor = "Blue"
+        Write-Output "BIMI: $BIMIString"
         $host.ui.RawUI.ForegroundColor = $DefaultColor
+    } Catch {
+        $ErrorMessage = "BIMI: $_.Exception.Message"
+        Show-ErrorMessage($ErrorMessage)
     }
 }
 
@@ -405,8 +405,9 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
     Get-DMARC -CheckDomain $AcceptedDomain
     Get-DKIM -CheckDomain $AcceptedDomain
     Get-KnownDKIMSelectors -CheckDomain $AcceptedDomain
-    Get-MtaSts -CheckDomain $AcceptedDomains
-    Get-TlsRpt -CheckDomain $AcceptedDomains
+    Get-MtaSts -CheckDomain $AcceptedDomain
+    Get-TlsRpt -CheckDomain $AcceptedDomain
+    Get-BIMI -CheckDomain $AcceptedDomain
 }
 
 

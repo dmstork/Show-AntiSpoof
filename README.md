@@ -24,6 +24,7 @@ MIT License Copyright (c) 2018-2020 Dave Stork
 - Version 1.10    30 October 2020
 - Version 1.20    13 Februari 2022
 - Version 1.30    29 April 2022
+- Version 1.40    22 July 2022
 
 ### Revision History  
 
@@ -35,6 +36,7 @@ MIT License Copyright (c) 2018-2020 Dave Stork
 - 1.10    Added more extensive DKIM checks for known selectors AND added parameter to check for a custom selector
 - 1.20    Added MTA-STS and TLS-RPT checks
 - 1.30    Added batch file support for domains. Changed default DNS server to 1.1.1.1. Fixed AcceptedDomains issue with Exchange
+- 1.40    Added BIMI support. More effecient use of functions, some small bugfixes
 
 ## Known Limitations  
 
