@@ -179,7 +179,7 @@ Function Get-MX {
             $MXcounter++
         }
     } Catch {
-        $ErrorMessage = "MX: $_.Exception.Message"
+        $ErrorMessage = "MX: "+$_.Exception.Message
         Show-ErrorMessage($ErrorMessage)
     }
 }
@@ -206,7 +206,7 @@ Function Get-SPF {
             }
         }
     } Catch {
-        $ErrorMessage = "SPF: $_.Exception.Message"
+        $ErrorMessage = "SPF: "+$_.Exception.Message
         Show-ErrorMessage($ErrorMessage)
     }
 }
@@ -225,7 +225,7 @@ Function Get-DMARC {
         Write-Output "DMARC: $DMARCString"
         $host.ui.RawUI.ForegroundColor = $DefaultColor
     } Catch {
-        $ErrorMessage = "DMARC: $_.Exception.Message"
+        $ErrorMessage = "DMARC: "+$_.Exception.Message
         Show-ErrorMessage($ErrorMessage)
     }
 }
@@ -244,7 +244,7 @@ Function Get-DKIM {
         $host.ui.RawUI.ForegroundColor = $DefaultColor
 
     } Catch {
-        $ErrorMessage = "DKIM Record: $_.Exception.Message"
+        $ErrorMessage = "DKIM Record: "+ $_.Exception.Message
         Show-ErrorMessage($ErrorMessage)
     }
 
@@ -317,7 +317,7 @@ Function Get-MtaSts {
         Write-Output "MTA-STS: $MTASTSString"
         $host.ui.RawUI.ForegroundColor = $DefaultColor
     } Catch {
-        $ErrorMessage = "MTA-STS Record: $_.Exception.Message"
+        $ErrorMessage = "MTA-STS Record: "+$_.Exception.Message
         Show-ErrorMessage($ErrorMessage)
     }
 
@@ -336,7 +336,7 @@ Function Get-MtaSts {
             Write-Output $MTASTSPolicy
             $host.ui.RawUI.ForegroundColor = $DefaultColor
         } Catch {
-            $ErrorMessage = "MTA-STS Policy: $_.Exception.Message"
+            $ErrorMessage = "MTA-STS Policy: "+$_.Exception.Message
             Show-ErrorMessage($ErrorMessage)
         }
 
@@ -367,7 +367,7 @@ Function Get-TlsRpt {
         Write-Output "TLS-RPT: $TLSRPTString"
         $host.ui.RawUI.ForegroundColor = $DefaultColor
     } Catch {
-        $ErrorMessage = "TLS-RPT: $_.Exception.Message"
+        $ErrorMessage = "TLS-RPT: "+$_.Exception.Message
         Show-ErrorMessage($ErrorMessage)
     }
 }
@@ -384,7 +384,7 @@ Function Get-BIMI {
         Write-Output "BIMI: $BIMIString"
         $host.ui.RawUI.ForegroundColor = $DefaultColor
     } Catch {
-        $ErrorMessage = "BIMI: $_.Exception.Message"
+        $ErrorMessage = "BIMI: "+$_.Exception.Message
         Show-ErrorMessage($ErrorMessage)
     }
 }
