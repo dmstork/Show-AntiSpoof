@@ -1,0 +1,6 @@
+selectorname, owner
+selector1, Microsoft Exchange Online
+selector2, Microsoft Exchange Online
+k1, MailChimp
+
+
