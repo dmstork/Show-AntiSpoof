@@ -56,6 +56,7 @@
     1.20    Added MTA-STS and TLS-RPT checks
     1.30    Added batch file support for domains. Changed default DNS server to 1.1.1.1. Fixed AcceptedDomains issue with Exchange
     1.40    Added BIMI support. More effecient use of functions, some small bugfixes
+    1.44    Added DKIM Selector file parameter to check multiple DKIM selector from CSV file
 
     KNOWN LIMITATIONS:
     - Required to be run in Exchange PowerShell in order to check all of your accepted domains in one run.
@@ -103,7 +104,8 @@ Param(
     [String]$DNSServer,
     [String]$DomainName,
     [String]$Selector,
-    [String]$DomainBatchFile
+    [String]$DomainBatchFile,
+    [String]$DKIMFile
 )
 
 #Initialize constants
