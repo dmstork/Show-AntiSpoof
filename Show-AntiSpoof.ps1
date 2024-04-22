@@ -111,7 +111,8 @@ $DNSServerDefault = "1.1.1.1"
 
 If ($DNSServer -ne ""){
     Try {
-        $temp = Resolve-DnsName -Server $DNSServer -Type A -Name "www.internet.nl" -ErrorAction Stop
+        #$temp = Resolve-DnsName -Server $DNSServer -Type A -Name "www.internet.nl" -ErrorAction Stop
+        $temp = Resolve-Dns -NameServer $DNSServer -QueryType A -Query "www.internet.nl" -ErrorAction Stop
         Write-Output "Using IP $DNSServer as DNS server"
     } Catch {  
         $DefaultColor = $host.ui.RawUI.ForegroundColor
@@ -156,8 +157,9 @@ Function Get-MX {
 
     # Check MX record
     Try {
-        $MXRecords = Resolve-DnsName -Server $DNSServer -Type MX -Name $CheckDomain -DNSOnly -ErrorAction Stop
-        $MXNumber = ($MXRecords).Count
+        #$MXRecords = Resolve-DnsName -Server $DNSServer -Type MX -Name $CheckDomain -DNSOnly -ErrorAction Stop
+        $MXRecords = Resolve-Dns -NameServer $DNSServer -QueryType MX -Query $CheckDomain -ErrorAction Stop
+        $MXNumber = ($MXRecords.answers).Count
         $MXcounter=1
     
         $DefaultColor = $host.ui.RawUI.ForegroundColor
@@ -166,6 +168,7 @@ Function Get-MX {
         $host.ui.RawUI.ForegroundColor = $DefaultColor 
     
         ForEach ($MXRecord in $MXRecords) {
+            Write-Output "Debug: MXrecord = $MXRecord"
             $MXNameExchange = $MXRecord.NameExchange
             $MXPreference = $MXRecord.Preference
             $MXTTL = $MXRecord.TTL
