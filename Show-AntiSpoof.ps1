@@ -158,8 +158,9 @@ Function Get-MX {
     # Check MX record
     Try {
         #$MXRecords = Resolve-DnsName -Server $DNSServer -Type MX -Name $CheckDomain -DNSOnly -ErrorAction Stop
-        $MXRecords = Resolve-Dns -NameServer $DNSServer -QueryType MX -Query $CheckDomain -ErrorAction Stop
-        $MXNumber = ($MXRecords.answers).Count
+        $MXRecordsAnswers = Resolve-Dns -NameServer $DNSServer -QueryType MX -Query $CheckDomain -ErrorAction Stop
+        $MXRecords = $MXRecordsAnswers.Answers
+        $MXNumber = $MXRecords.Count
         $MXcounter=1
     
         $DefaultColor = $host.ui.RawUI.ForegroundColor
@@ -169,9 +170,12 @@ Function Get-MX {
     
         ForEach ($MXRecord in $MXRecords) {
             Write-Output "Debug: MXrecord = $MXRecord"
-            $MXNameExchange = $MXRecord.NameExchange
-            $MXPreference = $MXRecord.Preference
-            $MXTTL = $MXRecord.TTL
+            #$MXNameExchange = $MXRecord.NameExchange
+            #$MXPreference = $MXRecord.Preference
+            #$MXTTL = $MXRecord.TTL
+
+            $MXNameExchange = $MXRecord.DomainName
+            $MXTTL = $MXRecord.TimeToLive
 
             If ($null -ne $MXNameExchange) {
                 $DefaultColor = $host.ui.RawUI.ForegroundColor
