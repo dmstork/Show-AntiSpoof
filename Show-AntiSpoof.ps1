@@ -174,8 +174,9 @@ Function Get-MX {
             #$MXPreference = $MXRecord.Preference
             #$MXTTL = $MXRecord.TTL
 
-            $MXNameExchange = $MXRecord.DomainName
-            $MXTTL = $MXRecord.TimeToLive
+            #$MXNameExchange = $MXRecord.DomainName
+            #$MXTTL = $MXRecord.TimeToLive
+            
 
             If ($null -ne $MXNameExchange) {
                 $DefaultColor = $host.ui.RawUI.ForegroundColor
@@ -196,7 +197,10 @@ Function Get-SPF {
 
     # Check SPF record
     Try {
-        $TXTRecords = Resolve-DnsName -Server $DNSServer -Type TXT -Name $CheckDomain -DNSOnly -ErrorAction Stop
+        #$TXTRecords = Resolve-DnsName -Server $DNSServer -Type TXT -Name $CheckDomain -DNSOnly -ErrorAction Stop
+        $TXTRecordsAnswers = Resolve-Dns -NameServer $DNSServer -QueryType TXT -Query $CheckDomain -ErrorAction Stop
+        $TXTRecords = $TXTRecordsAnswers.Answers
+        
         ForEach ($TXTRecord in $TXTRecords) {
             $TXTString = $TXTRecord.Strings
             
