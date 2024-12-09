@@ -43,7 +43,8 @@
     Version 1.10    30 October 2020
     Version 1.20    13 Februari 2022
     Version 1.30    29 April 2022
-    Version 1.40    22 July 2022 (Current)
+    Version 1.40    22 July 2024
+    Version 1.50    09 December 2024
 
     Revision History
     ---------------------------------------------------------------------
@@ -56,6 +57,7 @@
     1.20    Added MTA-STS and TLS-RPT checks
     1.30    Added batch file support for domains. Changed default DNS server to 1.1.1.1. Fixed AcceptedDomains issue with Exchange
     1.40    Added BIMI support. More effecient use of functions, some small bugfixes
+    1.50    Added DANE support with dig aka BIND-tools
 
     KNOWN LIMITATIONS:
     - Required to be run in Exchange PowerShell in order to check all of your accepted domains in one run.
@@ -389,6 +391,34 @@ Function Get-BIMI {
     }
 }
 
+Function Get-DANE {
+    Param($CheckDomain)
+    Try {
+        $MXRecords = Resolve-DnsName -Server $DNSServer -Type MX -Name $CheckDomain -DNSOnly -ErrorAction Stop
+        $MXNumber = ($MXRecords).Count
+        $MXcounter=1
+    
+    } Catch {
+        $ErrorMessage = "DANE MX: "+$_.Exception.Message
+        Show-ErrorMessage($ErrorMessage)
+    }
+
+    ForEach ($MXRecord in $MXRecords) {
+        $MXNameExchange = $MXRecord.NameExchange
+        $DANEDomain = "_25._tcp."+$MXNameExchange
+        $DANERecord = dig +short $DANEDomain TLSA
+
+        If ($null -ne $MXNameExchange) {
+            $DefaultColor = $host.ui.RawUI.ForegroundColor
+            $host.ui.RawUI.ForegroundColor = "Green"
+            Write-Output "$MXNameExchange has $DANERecord"
+            $host.ui.RawUI.ForegroundColor = $DefaultColor 
+        }
+        $MXcounter++
+    }
+
+}
+
 ForEach ($AcceptedDomain in $AcceptedDomains) {
     
     # DomainOption 2 is the only single domain from cmdline, which has no header. So this is a workaround.
@@ -408,6 +438,7 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
     Get-MtaSts -CheckDomain $AcceptedDomain
     Get-TlsRpt -CheckDomain $AcceptedDomain
     Get-BIMI -CheckDomain $AcceptedDomain
+    Get-DANE -CheckDomain $AcceptedDomain
 }
 
 
