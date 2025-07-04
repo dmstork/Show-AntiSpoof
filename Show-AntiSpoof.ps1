@@ -9,12 +9,14 @@
 
     Dave Stork et. al.
     dmstork at stalpaert.nl
+    https://davestork.nl
     https://dirteam.com/dave
+  
 
     .LICENSE
     MIT License
 
-    Copyright (c) 2018-2020 Dave Stork
+    Copyright (c) 2018-2025 Dave Stork
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal

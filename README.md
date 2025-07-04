@@ -6,12 +6,15 @@ PowerShell based script that checks every accepted domain of Exchange and will s
 
 - Dave Stork
 - dmstork at stalpaert.nl
-- [Dave Stork's IMHO](https://dirteam.com/dave)
-- [Dave Stork on Twitter](https://twitter.com/dmstork)
+- [Dave Stork blog] <https://davestork.nl>
+- [Dave Stork's IMHO] <https://dirteam.com/dave>
+- [Dave Stork on Bsky]
+- [Dave Stork on Mastodon]
+- [Dave Stork on Twitter] <https://twitter.com/dmstork>
 
 ## License
 
-MIT License Copyright (c) 2018-2020 Dave Stork
+MIT License Copyright (c) 2018-2025 Dave Stork
 
 ## Version
 
@@ -47,7 +50,7 @@ MIT License Copyright (c) 2018-2020 Dave Stork
 
 ## Link  
 
-[Dave Stork's IMHO](https://dirteam.com/dave)
+[Dave Stork blog] <https://davestork.nl>
 
 ## Description
 
