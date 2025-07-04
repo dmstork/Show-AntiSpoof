@@ -8,8 +8,8 @@ PowerShell based script that checks every accepted domain of Exchange and will s
 - dmstork at stalpaert.nl
 - [Dave Stork blog] <https://davestork.nl>
 - [Dave Stork's IMHO] <https://dirteam.com/dave>
-- [Dave Stork on Bsky]
-- [Dave Stork on Mastodon]
+- [Dave Stork on Bsky] <https://bsky.app/profile/davestork.nl>
+- [Dave Stork on Mastodon] <https://mastodon.social/@dmstork>
 - [Dave Stork on Twitter] <https://twitter.com/dmstork>
 
 ## License
