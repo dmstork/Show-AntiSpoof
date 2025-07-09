@@ -45,7 +45,8 @@
     Version 1.10    30 October 2020
     Version 1.20    13 Februari 2022
     Version 1.30    29 April 2022
-    Version 1.40    22 July 2022 (Current)
+    Version 1.40    22 July 2022
+    Version 1.45    09 July 2025
 
     Revision History
     ---------------------------------------------------------------------
@@ -58,6 +59,7 @@
     1.20    Added MTA-STS and TLS-RPT checks
     1.30    Added batch file support for domains. Changed default DNS server to 1.1.1.1. Fixed AcceptedDomains issue with Exchange
     1.40    Added BIMI support. More effecient use of functions, some small bugfixes
+    1.45    Added support for Autodiscover lookup
 
     KNOWN LIMITATIONS:
     - Required to be run in Exchange PowerShell in order to check all of your accepted domains in one run.
@@ -153,6 +155,40 @@ If (($DomainName -eq "") -and ($DomainBatchFile -eq "")){
         $AcceptedDomains = Import-Csv $DomainBatchFile
 }
 
+function Get-AutoDiscover {
+    param ($CheckDomain)
+     
+    #Check Autodiscover record A-record
+     Try {
+        $Domain = "autodiscover."+$CheckDomain
+        $DomainRecord = Resolve-DnsName -Server $DNSServer -Type CNAME -Name $Domain -Dnsonly -ErrorAction Stop
+        $DomainString = $DomainRecord.NameHost
+        
+        
+        $DefaultColor = $host.ui.RawUI.ForegroundColor
+        $host.ui.RawUI.ForegroundColor = "Green"
+        Write-Output "AutoDiscover CNAME Target: $DomainString"
+        $host.ui.RawUI.ForegroundColor = $DefaultColor
+    } Catch {
+        Try {
+        $Domain = "autodiscover."+$CheckDomain
+        $DomainRecord = Resolve-DnsName -Server $DNSServer -Type A -Name $Domain -Dnsonly -ErrorAction Stop
+
+        $DomainString = $DomainRecord.Strings
+        
+        $DefaultColor = $host.ui.RawUI.ForegroundColor
+        $host.ui.RawUI.ForegroundColor = "Green"
+        Write-Output "AutoDiscover CNAME: $DomainString"
+        $host.ui.RawUI.ForegroundColor = $DefaultColor
+        } Catch {
+            $ErrorMessage = "AutoDiscover CNAME: "+$_.Exception.Message
+            Show-ErrorMessage($ErrorMessage)
+        }
+        $ErrorMessage = "Autodiscover A: "+$_.Exception.Message
+        Show-ErrorMessage($ErrorMessage)
+    }
+    
+}
 Function Get-MX {
     Param($CheckDomain)
 
@@ -402,6 +438,7 @@ ForEach ($AcceptedDomain in $AcceptedDomains) {
     Write-Output "==============="
     Write-Output "Checking domain $AcceptedDomain"
     Write-Output "==============="
+    Get-AutoDiscover -CheckDomain $AcceptedDomain
     Get-MX -CheckDomain $AcceptedDomain
     Get-SPF -CheckDomain $AcceptedDomain
     Get-DMARC -CheckDomain $AcceptedDomain
